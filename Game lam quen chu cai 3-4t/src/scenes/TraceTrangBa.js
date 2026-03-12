@@ -281,6 +281,8 @@ export default class TraceTrangBa extends Phaser.Scene {
         this.maskShape.fillStyle(0xffffff, 1)
         this._fillSemiCircle(this.maskShape, this.u1)
         this._fillSemiCircle(this.maskShape, this.u2)
+
+        this.debugOverlay.clear()
     }
 
 
