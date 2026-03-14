@@ -239,15 +239,15 @@ export default class TraceTrangBa extends Phaser.Scene {
         this.u1 = {
             cx: m1.tx - 5,        // dx = -5
             cy: m1.ty + 50.04,    // dy = 50.04...
-            rw: rw1 * 0.5,
-            rh: rh1 * 0.75,
+            rw: rw1 * 0.46,
+            rh: rh1 * 0.70,
             rotation: Math.PI / 10
         }
         this.u2 = {
             cx: m2.tx + 1,        // dx = 1
             cy: m2.ty + 46.04,    // dy = 46.04...
-            rw: rw2 * 0.5,
-            rh: rh2 * 0.75,
+            rw: rw2 * 0.46,
+            rh: rh2 * 0.70,
             rotation: -Math.PI / 10
         }
 
@@ -310,6 +310,10 @@ export default class TraceTrangBa extends Phaser.Scene {
         const inU2 = this._inEllipse(pointer.x, pointer.y, this.u2)
 
         if (!inU1 && !inU2) return
+
+        this.debugOverlay.clear()
+        this._drawSemiCircle(this.debugOverlay, this.u1, 0xff0000, 0.3)
+        this._drawSemiCircle(this.debugOverlay, this.u2, 0xff0000, 0.3)
 
         /* ERASER */
 
