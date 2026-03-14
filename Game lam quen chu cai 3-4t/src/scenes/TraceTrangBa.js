@@ -311,9 +311,7 @@ export default class TraceTrangBa extends Phaser.Scene {
 
         if (!inU1 && !inU2) return
 
-        this.debugOverlay.clear()
-        this._drawSemiCircle(this.debugOverlay, this.u1, 0xff0000, 0.3)
-        this._drawSemiCircle(this.debugOverlay, this.u2, 0xff0000, 0.3)
+
 
         /* ERASER */
 
