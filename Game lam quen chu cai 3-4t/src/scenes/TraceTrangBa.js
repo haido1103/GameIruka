@@ -210,8 +210,8 @@ export default class TraceTrangBa extends Phaser.Scene {
                     this.debugOverlay = this.add.graphics()
                 }
                 this.debugOverlay.clear()
-                this._drawSemiCircle(this.debugOverlay, this.u1, 0xff0000, 0.3)
-                this._drawSemiCircle(this.debugOverlay, this.u2, 0xff0000, 0.3)
+                // this._drawSemiCircle(this.debugOverlay, this.u1, 0xff0000, 0.3)
+                // this._drawSemiCircle(this.debugOverlay, this.u2, 0xff0000, 0.3)
 
                 // Mở khóa cho phép vẽ
                 this.canDraw = true;
@@ -333,7 +333,7 @@ export default class TraceTrangBa extends Phaser.Scene {
 
         if (!this.u1 || !this.u2 || !this.u1Total || !this.u2Total) return
 
-        const FILL_RATIO = 1.01
+        const FILL_RATIO = 1.0
 
         const f1 = this.u1Cells.size / this.u1Total
         const f2 = this.u2Cells.size / this.u2Total
