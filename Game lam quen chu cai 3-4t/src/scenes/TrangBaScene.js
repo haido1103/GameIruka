@@ -20,7 +20,7 @@ export default class TrangBaScene extends Phaser.Scene {
 
         this.load.audio("intro_audio2", "/assets/audio/cungcogoiten2.mp3")
         this.load.audio("success_audio", "/assets/audio/totlam.mp3")
-        this.load.audio("fail_audio", "/assets/audio/lamlainhe.mp3")
+        this.load.audio("fail_audio2", "/assets/audio/lamlainhe2.mp3")
 
 
     }
@@ -97,13 +97,13 @@ export default class TrangBaScene extends Phaser.Scene {
 
         ui.add(speaker)
 
-        const expectedText = "Cái ô"
+        const expectedText = " Cái ô"
 
         speaker.on("pointerdown", () => {
 
             try {
                 if (this.sound && this.cache.audio.exists("intro_audio2")) {
-                    
+
                     this.sound.removeByKey("intro_audio2");
 
                     const s = this.sound.add("intro_audio2")
@@ -208,7 +208,7 @@ export default class TrangBaScene extends Phaser.Scene {
 
         const stopAndSubmit = async () => {
             if (!this.isRecording) return;
-            
+
             if (this.recordTimeout) {
                 clearTimeout(this.recordTimeout);
                 this.recordTimeout = null;
@@ -228,7 +228,7 @@ export default class TrangBaScene extends Phaser.Scene {
 
                     audioFile: audioFile,
                     questionIndex: this.index + 1,
-                    targetText: { text: "Cái ô" },
+                    targetText: { text: " Cái ô" },
                     durationMs: durationMs,
                     exerciseType: "NURSERY_RHYME",
                     testmode: true
@@ -274,8 +274,8 @@ export default class TrangBaScene extends Phaser.Scene {
                     game.recordWrong()
 
                     feedbackText.setText("Thử lại nhé!")
-                    
-                    this.sound.play("fail_audio")
+
+                    this.sound.play("fail_audio2")
 
                 }
 
@@ -300,7 +300,7 @@ export default class TrangBaScene extends Phaser.Scene {
                     this.isRecording = true
 
                     mic.setTint(0xff0000)
-                    
+
                     this.recordTimeout = setTimeout(() => {
                         stopAndSubmit();
                     }, 5000);
