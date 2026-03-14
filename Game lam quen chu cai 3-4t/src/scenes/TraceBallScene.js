@@ -116,7 +116,7 @@ export default class TraceBallScene extends Phaser.Scene {
         this.circle1Pixels = new Set()
         this.circle2Pixels = new Set()
 
-        this.circleThreshold = 397
+        this.circleThreshold = 400
         this.finished = false
 
         /* COLORS */
