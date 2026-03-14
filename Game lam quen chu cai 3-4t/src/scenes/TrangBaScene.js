@@ -218,13 +218,13 @@ export default class TrangBaScene extends Phaser.Scene {
 
             this.isRecording = false
 
-            const { blob, durationMs } = await this._recHandle.stop()
+            if (this._recHandle) {
+                const { blob, durationMs } = await this._recHandle.stop()
+                const audioFile = new File([blob], "answer.webm", { type: blob.type || "audio/webm" })
 
-            const audioFile = new File([blob], "answer.webm", { type: blob.type || "audio/webm" })
+                try {
 
-            try {
-
-                const submitResp = await voice.Submit({
+                    const submitResp = await voice.Submit({
 
                     audioFile: audioFile,
                     questionIndex: this.index + 1,
@@ -277,12 +277,13 @@ export default class TrangBaScene extends Phaser.Scene {
 
                     this.sound.play("fail_audio2")
 
+                    }
+
+                } catch (err) {
+
+                    console.error("submit error", err)
+
                 }
-
-            } catch (err) {
-
-                console.error("submit error", err)
-
             }
 
         }
@@ -326,6 +327,17 @@ export default class TrangBaScene extends Phaser.Scene {
 
         })
 
-    }
+        /* ================= CLEANUP ON RESTART/SHUTDOWN ================= */
 
+        this.events.on("shutdown", () => {
+            if (this.recordTimeout) {
+                clearTimeout(this.recordTimeout)
+                this.recordTimeout = null
+            }
+            if (this.isRecording && this._recHandle) {
+                this.isRecording = false
+                this._recHandle.stop().catch(() => { })
+            }
+        })
+    }
 }
