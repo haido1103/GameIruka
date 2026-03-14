@@ -130,8 +130,6 @@ export default class TraceTrangBa extends Phaser.Scene {
 
         this.eraserCursor.setVisible(false)
 
-        /* STATE */
-
         this.currentColor = null
         this.isErasing = false
         this.finished = false
@@ -173,12 +171,57 @@ export default class TraceTrangBa extends Phaser.Scene {
             ease: "Bounce.easeOut",
             onComplete: () => {
 
-                // Setup mask sau khi panel đã ở đúng vị trí
-                this.setupPaintSystem()
-
+                // Tự động phát âm thanh khi vào màn hình
                 if (this.sound && this.cache.audio.exists("tracecaio")) {
                     this.sound.play("tracecaio")
                 }
+
+                // --- TẠO MASK SAU KHI UI ĐÃ DỪNG LẠI ---
+                // Xoá mask cũ nếu có (Fix lỗi Restart bị to mask)
+                if (this.maskGraphics) {
+                    this.maskGraphics.destroy()
+                }
+
+                this.maskGraphics = this.make.graphics();
+                this.maskGraphics.fillStyle(0xffffff);
+
+                // Tính toán kích thước thực tế trên màn hình (đã bao gồm scale của container cha)
+                const w1 = this.circle1.getWorldTransformMatrix();
+                // Dùng displayWidth/displayHeight (kích thước sau khi đã được UI container scale)
+                const rw1 = this.circle1.displayWidth / 2;
+                const rh1 = this.circle1.displayHeight / 2;
+
+                this.u1 = { cx: w1.tx - 5, cy: w1.ty + 50.04, rw: rw1 * 0.5, rh: rh1 * 0.75, rotation: Math.PI / 10 };
+                this._fillSemiCircle(this.maskGraphics, this.u1);
+
+                const w2 = this.circle2.getWorldTransformMatrix();
+                
+                const rw2 = this.circle2.displayWidth / 2;
+                const rh2 = this.circle2.displayHeight / 2;
+
+                this.u2 = { cx: w2.tx + 1, cy: w2.ty + 46.06, rw: rw2 * 0.5, rh: rh2 * 0.75, rotation: -Math.PI / 10.5 };
+                this._fillSemiCircle(this.maskGraphics, this.u2);
+
+                // Áp dụng Geometry Mask lên paintRT
+                this.paintRT.setMask(this.maskGraphics.createGeometryMask());
+
+                /* DEBUG OVERLAY - Vẽ hiển thị mask màu đỏ mờ để dễ nhìn */
+                if (!this.debugOverlay) {
+                    this.debugOverlay = this.add.graphics()
+                }
+                this.debugOverlay.clear()
+                this._drawSemiCircle(this.debugOverlay, this.u1, 0xff0000, 0.3)
+                this._drawSemiCircle(this.debugOverlay, this.u2, 0xff0000, 0.3)
+
+                // Mở khóa cho phép vẽ
+                this.canDraw = true;
+
+                // Tracking số lượng mảnh
+                this.u1Cells = new Set()
+                this.u2Cells = new Set()
+                this.u1Total = this._countEllipseCells(this.u1, 16)
+                this.u2Total = this._countEllipseCells(this.u2, 16)
+
             }
         })
 
@@ -221,79 +264,12 @@ export default class TraceTrangBa extends Phaser.Scene {
 
 
     /* ============================================================
-       SETUP PAINT SYSTEM
-       ============================================================ */
-
-    setupPaintSystem() {
-
-        // Vị trí world của 2 ellipse sau khi panel đã ở đúng chỗ
-        const m1 = this.circle1.getWorldTransformMatrix()
-        const m2 = this.circle2.getWorldTransformMatrix()
-
-        const rw1 = this.circle1.displayWidth / 2
-        const rh1 = this.circle1.displayHeight / 2
-        const rw2 = this.circle2.displayWidth / 2
-        const rh2 = this.circle2.displayHeight / 2
-
-        // Thu nhỏ kích thước một nửa bán kính, và tăng tỷ lệ chiều cao thêm một chút. Thêm góc nghiêng rotation bằng radian.
-        this.u1 = {
-            cx: m1.tx - 5,        // dx = -5
-            cy: m1.ty + 50.04,    // dy = 50.04...
-            rw: rw1 * 0.46,
-            rh: rh1 * 0.70,
-            rotation: Math.PI / 10
-        }
-        this.u2 = {
-            cx: m2.tx + 1,        // dx = 1
-            cy: m2.ty + 46.04,    // dy = 46.04...
-            rw: rw2 * 0.46,
-            rh: rh2 * 0.70,
-            rotation: -Math.PI / 10
-        }
-
-        /* DEBUG OVERLAY – nhìn thấy được để chỉnh tay */
-
-        this.debugOverlay = this.add.graphics()
-
-        this.updateMaskAndDebugOverlay()
-
-        /* TRACKING */
-
-        this.u1Cells = new Set()
-        this.u2Cells = new Set()
-
-        const CELL = 16
-        this.u1Total = this._countEllipseCells(this.u1, CELL)
-        this.u2Total = this._countEllipseCells(this.u2, CELL)
-
-        console.log("[MASK] u1:", this.u1Total, "cells | u2:", this.u2Total, "cells")
-
-    }
-
-    updateMaskAndDebugOverlay() {
-        if (!this.maskShape) {
-            this.maskShape = this.make.graphics({ add: false })
-            const geomMask = this.maskShape.createGeometryMask()
-            this.paintRT.setMask(geomMask)
-        }
-
-        this.maskShape.clear()
-        this.maskShape.fillStyle(0xffffff, 1)
-        this._fillSemiCircle(this.maskShape, this.u1)
-        this._fillSemiCircle(this.maskShape, this.u2)
-
-        this.debugOverlay.clear()
-    }
-
-
-
-    /* ============================================================
        DRAW
        ============================================================ */
 
     draw(pointer) {
 
-        if (this.finished) return
+        if (this.finished || !this.canDraw) return
 
         if (this.isErasing) {
             this.eraserCursor.setPosition(pointer.x, pointer.y)
