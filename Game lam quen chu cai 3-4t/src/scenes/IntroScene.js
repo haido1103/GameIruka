@@ -233,30 +233,30 @@ export default class IntroScene extends Phaser.Scene {
 
             this.isRecording = false
 
-            const { blob, durationMs } = await this._recHandle.stop()
+            if (this._recHandle) {
+                const { blob, durationMs } = await this._recHandle.stop()
+                const audioFile = new File([blob], "answer.webm", { type: blob.type || "audio/webm" })
+                // ... logic tiếp tục
+                try {
 
-            const audioFile = new File([blob], "answer.webm", { type: blob.type || "audio/webm" })
+                    const submitResp = await voice.Submit({
 
-            try {
+                        audioFile: audioFile,
+                        questionIndex: this.index + 1,
+                        targetText: { text: "Con chó" },
+                        durationMs: durationMs,
+                        exerciseType: "NURSERY_RHYME",
+                        testmode: true
 
-                const submitResp = await voice.Submit({
+                    })
 
-                    audioFile: audioFile,
-                    questionIndex: this.index + 1,
-                    targetText: { text: "Con chó" },
-                    durationMs: durationMs,
-                    exerciseType: "NURSERY_RHYME",
-                    testmode: true
+                    console.log("VOICE RESULT", submitResp)
 
-                })
+                    let score = submitResp.score || 0
 
-                console.log("VOICE RESULT", submitResp)
+                    /* ================= PASS ================= */
 
-                let score = submitResp.score || 0
-
-                /* ================= PASS ================= */
-
-                if (score >= PASS_SCORE) {
+                    if (score >= PASS_SCORE) {
 
                     this.score += 1
 
@@ -317,12 +317,13 @@ export default class IntroScene extends Phaser.Scene {
                     
                     this.sound.play("fail_audio")
 
+                    }
+
+                } catch (err) {
+
+                    console.error("submit error", err)
+
                 }
-
-            } catch (err) {
-
-                console.error("submit error", err)
-
             }
 
         }
@@ -366,6 +367,17 @@ export default class IntroScene extends Phaser.Scene {
 
         })
 
-    }
+        /* ================= CLEANUP ON RESTART/SHUTDOWN ================= */
 
+        this.events.on("shutdown", () => {
+            if (this.recordTimeout) {
+                clearTimeout(this.recordTimeout)
+                this.recordTimeout = null
+            }
+            if (this.isRecording && this._recHandle) {
+                this.isRecording = false
+                this._recHandle.stop().catch(() => {})
+            }
+        })
+    }
 }
