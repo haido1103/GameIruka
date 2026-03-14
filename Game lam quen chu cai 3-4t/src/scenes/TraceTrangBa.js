@@ -333,7 +333,7 @@ export default class TraceTrangBa extends Phaser.Scene {
 
         if (!this.u1 || !this.u2 || !this.u1Total || !this.u2Total) return
 
-        const FILL_RATIO = 1.0
+        const FILL_RATIO = 1.01
 
         const f1 = this.u1Cells.size / this.u1Total
         const f2 = this.u2Cells.size / this.u2Total
